@@ -11,21 +11,25 @@ import Kingfisher
 public class KingfisherSource: NSObject, InputSource {
     var url: URL
     var placeholder: UIImage?
+    var name : String!
     
-    public init(url: URL) {
+    public init(url: URL, name : String) {
         self.url = url
+        self.name = name
         super.init()
     }
     
-    public init(url: URL, placeholder: UIImage) {
+    public init(url: URL, placeholder: UIImage, name : String) {
         self.url = url
         self.placeholder = placeholder
+        self.name = name
         super.init()
     }
     
-    public init?(urlString: String) {
+    public init?(urlString: String, name : String) {
         if let validUrl = URL(string: urlString) {
             self.url = validUrl
+            self.name = name
             super.init()
         } else {
             return nil

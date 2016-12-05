@@ -10,6 +10,9 @@ import UIKit
 open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     
     open let imageView = UIImageView()
+    open var  playImageView = UIImageView()
+    open var  movieNameLabel = UILabel()
+    open var movieName = ""
     open let image: InputSource
     open var gestureRecognizer: UITapGestureRecognizer?
     
@@ -26,17 +29,30 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         self.image = image
         
         super.init(frame: CGRect.null)
-
+        self.backgroundColor = UIColor.black
         imageView.clipsToBounds = true
         imageView.isUserInteractionEnabled = true
         
         setPictoCenter()
-        
+            
         // scroll view configuration
         delegate = self
         showsVerticalScrollIndicator = false
         showsHorizontalScrollIndicator = false
         addSubview(imageView)
+        playImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 64, height: 64))
+        playImageView.center = CGPoint(x: screenSize().width/2, y: screenSize().height/2)
+        playImageView.image = UIImage(named: "Frameworks/ImageSlideshow.framework/ImageSlideshow.bundle/play")
+        playImageView.alpha = 0.7
+        
+        movieNameLabel = UILabel(frame: CGRect(x: 0, y: 0, width: screenSize().width, height: 20))
+        movieNameLabel.text = movieName
+        movieNameLabel.font = UIFont.systemFont(ofSize: 15)
+        movieNameLabel.textColor = UIColor.white
+        movieNameLabel.textAlignment = .left
+            
+        addSubview(playImageView)
+        addSubview(movieNameLabel)
         minimumZoomScale = 1.0
         maximumZoomScale = calculateMaximumScale()
         
@@ -77,6 +93,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         contentSize = imageView.frame.size
         maximumZoomScale = calculateMaximumScale()
     }
+    
 
     /// Request to load image to imageView
     func loadImage() {
