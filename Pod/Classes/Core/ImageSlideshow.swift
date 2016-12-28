@@ -2,7 +2,7 @@
 //  ImageSlideshow.swift
 //  ImageSlideshow
 //
-//  Created by Petr Zvoníček on 30.07.15.
+//  Modified by Dhvl Golakiya on 25.12.16.
 //
 
 import UIKit
@@ -55,7 +55,7 @@ open class ImageSlideshow: UIView {
             }
         }
     }
-
+    
     /// Called on each currentPage change
     open var currentPageChanged: ((_ page: Int) -> ())?
     
@@ -95,10 +95,10 @@ open class ImageSlideshow: UIView {
             setTimerIfNeeded()
         }
     }
-
+    
     /// Image preload configuration, can be sed to .fixed to enable lazy load or .all
     open var preload = ImagePreload.all
-
+    
     /// Content mode of each image in the slideshow
     open var contentScaleMode: UIViewContentMode = UIViewContentMode.scaleAspectFit {
         didSet {
@@ -110,9 +110,9 @@ open class ImageSlideshow: UIView {
     
     fileprivate var slideshowTimer: Timer?
     fileprivate var scrollViewImages = [InputSource]()
-
+    
     open fileprivate(set) var slideshowTransitioningDelegate: ZoomAnimatedTransitioningDelegate?
-
+    
     // MARK: - Life cycle
     
     override public init(frame: CGRect) {
@@ -151,10 +151,10 @@ open class ImageSlideshow: UIView {
     
     override open func layoutSubviews() {
         super.layoutSubviews()
-
+        
         // fixes the case when automaticallyAdjustsScrollViewInsets on parenting view controller is set to true
         scrollView.contentInset = UIEdgeInsets.zero
-
+        
         if case .hidden = self.pageControlPosition {
             pageControl.isHidden = true
         } else {
@@ -194,9 +194,10 @@ open class ImageSlideshow: UIView {
         for image in scrollViewImages {
             let item = ImageSlideshowItem(image: image, zoomEnabled: self.zoomEnabled)
             item.imageView.contentMode = self.contentScaleMode
+            item.mainImageView.contentMode = self.contentScaleMode
             item.movieNameLabel.text = (image as! KingfisherSource).name
             item.movieNameLabel.frame = CGRect(x: 10, y: 0, width: scrollView.frame.size.width - 20, height: 20)
-            
+            item.mainImageView.frame = CGRect(x: 0, y: 20, width: scrollView.frame.size.width, height: scrollView.frame.size.height-20)
             item.playImageView.center = CGPoint(x: scrollView.frame.size.width / 2, y: scrollView.frame.size.height/2)
             slideshowItems.append(item)
             scrollView.addSubview(item)
@@ -209,13 +210,13 @@ open class ImageSlideshow: UIView {
         } else {
             scrollViewPage = 0
         }
-
+        
         loadImages(for: 0)
     }
-
+    
     private func loadImages(for page: Int) {
         let totalCount = slideshowItems.count
-
+        
         for i in 0..<totalCount {
             let item = slideshowItems[i]
             switch self.preload {
@@ -227,7 +228,7 @@ open class ImageSlideshow: UIView {
                 shouldLoad ? item.loadImage() : item.releaseImage()
             }
         }
-
+        
     }
     
     // MARK: - Image setting
@@ -331,7 +332,7 @@ open class ImageSlideshow: UIView {
     open func unpauseTimerIfNeeded() {
         setTimerIfNeeded()
     }
-
+    
     /// Open full screen slideshow
     @discardableResult
     open func presentFullScreenController(from controller:UIViewController) -> FullScreenSlideshowViewController {
@@ -339,19 +340,19 @@ open class ImageSlideshow: UIView {
         fullscreen.pageSelected = {(page: Int) in
             self.setCurrentPage(page, animated: false)
         }
-
+        
         fullscreen.initialPage = self.currentPage
         fullscreen.inputs = self.images
         slideshowTransitioningDelegate = ZoomAnimatedTransitioningDelegate(slideshowView: self, slideshowController: fullscreen)
         fullscreen.transitioningDelegate = slideshowTransitioningDelegate
         controller.present(fullscreen, animated: true, completion: nil)
-
+        
         return fullscreen
     }
 }
 
 extension ImageSlideshow: UIScrollViewDelegate {
-
+    
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         if slideshowTimer?.isValid != nil {
             slideshowTimer?.invalidate()

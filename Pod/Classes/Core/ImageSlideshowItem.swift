@@ -2,7 +2,7 @@
 //  ZoomablePhotoView.swift
 //  ImageSlideshow
 //
-//  Created by Petr Zvoníček on 30.07.15.
+//  Modified by Dhvl Golakiya on 25.12.16.
 //
 
 import UIKit
@@ -11,6 +11,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     
     open let imageView = UIImageView()
     open var  playImageView = UIImageView()
+    open var mainImageView = UIImageView()
     open var  movieNameLabel = UILabel()
     open var movieName = ""
     open let image: InputSource
@@ -32,14 +33,16 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         self.backgroundColor = UIColor.black
         imageView.clipsToBounds = true
         imageView.isUserInteractionEnabled = true
-        
+        mainImageView.clipsToBounds = true
+        mainImageView.isUserInteractionEnabled = true
         setPictoCenter()
-            
+        
         // scroll view configuration
         delegate = self
         showsVerticalScrollIndicator = false
         showsHorizontalScrollIndicator = false
         addSubview(imageView)
+        addSubview(mainImageView)
         playImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 64, height: 64))
         playImageView.center = CGPoint(x: screenSize().width/2, y: screenSize().height/2)
         playImageView.image = UIImage(named: "Frameworks/ImageSlideshow.framework/ImageSlideshow.bundle/play")
@@ -50,7 +53,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         movieNameLabel.font = UIFont.systemFont(ofSize: 15)
         movieNameLabel.textColor = UIColor.white
         movieNameLabel.textAlignment = .left
-            
+        
         addSubview(playImageView)
         addSubview(movieNameLabel)
         minimumZoomScale = 1.0
@@ -94,7 +97,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         maximumZoomScale = calculateMaximumScale()
     }
     
-
+    
     /// Request to load image to imageView
     func loadImage() {
         if self.imageView.image == nil {
@@ -102,15 +105,22 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
             image.load(to: self.imageView) { image in
                 // set image to nil if there was a release request during the image load
                 self.imageView.image = self.imageReleased ? nil : image
+                self.mainImageView.image = self.imageReleased ? nil : image
+                self.imageView.image = nil
+            }
+            
+            image.load(to: self.mainImageView) { image in
+                // set image to nil if there was a release request during the image load
+                self.mainImageView.image = self.imageReleased ? nil : image
             }
         }
     }
-
+    
     func releaseImage() {
         imageReleased = true
         self.imageView.image = nil
     }
-
+    
     // MARK: - Image zoom & size
     
     func isZoomed() -> Bool {
@@ -150,6 +160,8 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         }
         
         imageView.frame = frameToCenter
+        mainImageView.frame = CGRect(x: 0, y: 0, width: frameToCenter.size.width, height: frameToCenter.height - 30)
+        
     }
     
     fileprivate func calculatePictureSize() -> CGSize {
